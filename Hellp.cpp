@@ -48,13 +48,14 @@ int main(){
     const int screenHeight = 450; 
     const int fps=60;
     int current_fps=fps;
-    Color BG = {17, 47, 90, 230};
-
 
     InitWindow(screenWidth, screenHeight, "Hellp");
+    SetTargetFPS(current_fps);
+
+    Color BG = {0,0,0,255};
 
     Texture2D star_texture[StarTextures];
-    for(int i=0; i<=StarTextures; i++){
+    for(int i=0; i<StarTextures; i++){
         Image Star = LoadImage(TextFormat("Assets/Star%02d.png",i));
         star_texture[i]=LoadTextureFromImage(Star);
         UnloadImage(Star);
@@ -69,7 +70,7 @@ int main(){
     Vector2 spawn = {0, 0};
     int bulletcount = 0;
     int bulletDisabled = 0;
-    float cooldown = 0.08;
+    float cooldown = 0.1;
     float timer=cooldown;
     Color bullet_color = YELLOW;
 
@@ -92,9 +93,7 @@ int main(){
         DrawCircle(bulletTexture.texture.width/2,bulletTexture.texture.height/2,(float)2, YELLOW);
     EndTextureMode();
 
-    SetTargetFPS(current_fps);
-
-    for(int i=0; i<10; i++){
+    for(int i=0; i<5; i++){
         spawn.x = GetRandomValue(0, screenWidth);
         spawn.y = -GetRandomValue(1, 5);
 
@@ -176,7 +175,7 @@ int main(){
         ClearBackground(BG);
 
         for(int i=0; i<starcount;i++){
-            DrawTexture(star_texture[star[i].texture_num], star[i].pos.x, star[i].pos.y, WHITE);
+            DrawTexture(star_texture[star[i].texture_num], star[i].pos.x, star[i].pos.y, LIGHTGRAY);
         }
 
         DrawLineBezier({0, 0}, {screenWidth, 0}, 7, DARKGRAY);
@@ -191,16 +190,15 @@ int main(){
                 DrawTexture(bulletTexture.texture, bull[i].position.x - bulletTexture.texture.width/2, bull[i].position.y - bulletTexture.texture.height/2, bull[i].colour);
             }
         }
-
+        
+        if(IsKeyDown(KEY_R)){immune_timer=spawn_immunity; immune=true; alive = true; }
         if(!alive){
             DrawText("ded!", (int)screenWidth/2.0 , (int)screenHeight/2.0, 25, LIGHTGRAY);
-            if(IsKeyDown(KEY_R)){immune_timer=spawn_immunity; immune=true; alive = true; }
         //I actually forgot to make him alive when cleaning code. So, he was just immortal & dead, which is famously a bad thing.
         //I just realized that I also forgot to make him immune. So, he was just dead. 
         }
 
         EndDrawing();
-        
     }
 
     for(int i=1; i<=StarTextures; i++){
@@ -230,6 +228,7 @@ void Stars::choose(){
                 break;
             case 1:
                 texture_num = 3;
+                break;
             default:
                 cout<<"ERROR: Choose failed for far, fast"<<endl;
                 break;
