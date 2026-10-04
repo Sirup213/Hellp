@@ -1,13 +1,13 @@
 #include <iostream>
 #include <string.h>
-#include <stdlib.h>
+#include <random>
 #include <math.h>
 #include "raylib.h"
 #include "raymath.h"
 
 #define MAX_BULLETS 5000
 #define MAX_STARS 20
-#define StarTextures 7
+#define StarTextures 6
 
 using namespace std;
 
@@ -19,11 +19,20 @@ struct Bullet {
     Color colour;
 };
 
+enum Distance{Near, BitFar, VeryFar};
+
 class Stars{
 public:
     Vector2 pos;
+    float scrollspeed;
     int texture_num;
     bool Far;
+    bool fast;
+    Distance distance;
+
+    void spawn();
+    void update(float dt);
+    void choose();
 };
 
 
@@ -31,6 +40,8 @@ void Etriangle(Vector2 vector, float radius, Color colour);
 
 void swap(int i, int j);
 
+const int screenWidth = 800;
+const int screenHeight = 450;
 
 int main(){
     const int screenWidth = 800;
@@ -96,30 +107,26 @@ int main(){
     }
 
     for(int i=0; i<20;i++){
-        spawn.x = GetRandomValue(0, screenWidth);
-        spawn.y = -GetRandomValue(-680, 0);
-        star[starcount].pos = spawn;
-        star[starcount].texture_num = GetRandomValue(0,StarTextures-1);
+        star[starcount].spawn();
         starcount++;
     }
 
     while(!WindowShouldClose()){
 
-        if(immune_timer<spawn_immunity){alive = true; immune_timer += (float) GetFrameTime();}
+        float dt = GetFrameTime();
+
+        if(immune_timer>0){ immune_timer -= (float) dt;}
+        else{immune_timer=0; immune=false;}
         if(alive){
             //Player
-            if(IsKeyDown(KEY_W)==true){ Circle.y -= GetFrameTime()*spedmult*velocity;}
-            if(IsKeyDown(KEY_A)==true){ Circle.x -= GetFrameTime()*spedmult*velocity;}
-            if(IsKeyDown(KEY_S)==true){ Circle.y += GetFrameTime()*spedmult*velocity;}
-            if(IsKeyDown(KEY_D)==true){ Circle.x += GetFrameTime()*spedmult*velocity;}
+            if(IsKeyDown(KEY_W)==true){ Circle.y -= dt*spedmult*velocity;}
+            if(IsKeyDown(KEY_A)==true){ Circle.x -= dt*spedmult*velocity;}
+            if(IsKeyDown(KEY_S)==true){ Circle.y += dt*spedmult*velocity;}
+            if(IsKeyDown(KEY_D)==true){ Circle.x += dt*spedmult*velocity;}
 
             //Star
             for(int i=0;i<starcount;i++){
-                star[i].pos.y+=scrollspeed*GetFrameTime();
-                if(star[i].pos.y>screenHeight){
-                star[i].pos.y=GetRandomValue(-680,0); 
-                star[i].pos.x=GetRandomValue(0,screenWidth);
-                }
+                star[i].update(dt);
             }
         }
 
@@ -156,7 +163,7 @@ int main(){
             if(alive==true && !bull[i].disabled){
                 bull[i].position.x += GetFrameTime()*bull[i].velocity.x;
                 bull[i].position.y += GetFrameTime()*bull[i].velocity.y;
-                if(Vector2Length(Vector2Subtract(Circle, bull[i].position)) <= 6){alive = false;}
+                if(Vector2Length(Vector2Subtract(Circle, bull[i].position)) <= 6 & immune==false ){alive = false;}
                 if(bull[i].position.x < 0 | bull[i].position.x > screenWidth){ bull[i].disabled = true; }
                 else{
                     if(bull[i].position.y > screenHeight){ bull[i].disabled = true; }
@@ -187,7 +194,9 @@ int main(){
 
         if(!alive){
             DrawText("ded!", (int)screenWidth/2.0 , (int)screenHeight/2.0, 25, LIGHTGRAY);
-            if(IsKeyPressed(KEY_R)){immune_timer=0;}
+            if(IsKeyDown(KEY_R)){immune_timer=spawn_immunity; immune=true; alive = true; }
+        //I actually forgot to make him alive when cleaning code. So, he was just immortal & dead, which is famously a bad thing.
+        //I just realized that I also forgot to make him immune. So, he was just dead. 
         }
 
         EndDrawing();
@@ -205,6 +214,39 @@ int main(){
     CloseWindow();
 
     return 0;
+}
+void Stars::choose(){
+    fast = GetRandomValue(0,1);
+    Far = GetRandomValue(0,1);
+
+    if(fast == true){
+        scrollspeed = 12;
+        if(Far == true){
+            int val = GetRandomValue(0,1);
+            switch (val)
+            {
+            case 0:
+                texture_num = 2;
+                break;
+            case 1:
+                texture_num = 3;
+            default:
+                cout<<"ERROR: Choose failed for far, fast"<<endl;
+                break;
+            }
+        }
+        else{texture_num = 5;}
+    }
+    else{scrollspeed = 8; texture_num = 4;}
+}
+void Stars::update(float dt){
+    pos.y += scrollspeed*dt;
+    if(pos.y > screenHeight){ spawn(); }
+}
+void Stars::spawn(){
+    pos.x = GetRandomValue(0, screenWidth);
+    pos.y = GetRandomValue(-660,0);
+    Stars::choose();
 }
 
 void Etriangle(Vector2 vector, float radius, Color colour){
