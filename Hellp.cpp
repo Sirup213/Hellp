@@ -1,17 +1,28 @@
 #include <iostream>
 #include <string.h>
 #include <random>
-#include <math.h>
 #include <raylib.h>
 #include <raymath.h>
-
-#include "Stars.h"
 
 #define MAX_BULLETS 5000
 #define MAX_STARS 20
 #define StarTextures 9
 
 using namespace std;
+
+class Stars{
+private:
+     Vector2 pos;
+    float scrollspeed;
+    int texture_num;
+    bool Far;
+    bool fast;
+public:
+    void spawn();
+    void update(float dt);
+    void choose();
+    void draw(Texture2D star_texture[StarTextures]);
+};
 
 struct Bullet {
     Vector2 position;
@@ -121,8 +132,6 @@ int main(){
             }
         }
 
-       
-
         if(bulletcount>= MAX_BULLETS){
             bulletcount=0;
             bulletDisabled=0;
@@ -193,7 +202,7 @@ int main(){
         EndDrawing();
     }
 
-    for(int i=1; i<=StarTextures; i++){
+    for(int i=1; i<StarTextures; i++){
         UnloadTexture(star_texture[i]);
     }
     UnloadRenderTexture(bulletTexture);
@@ -204,6 +213,61 @@ int main(){
     CloseWindow();
 
     return 0;
+}
+
+void Stars::choose(){
+    fast = GetRandomValue(0,1);
+    Far = GetRandomValue(0,1);
+
+    if(fast == true){
+        scrollspeed = 12;
+        if(Far == true){
+            int val = GetRandomValue(0,1);
+            switch (val)
+            {
+            case 0:
+                texture_num = 2;
+                break;
+            case 1:
+                texture_num = 3;
+                break;
+            default:
+                cout<<"ERROR: Choose failed for far, fast"<<endl;
+                break;
+            }
+        }
+        else{
+            int val = GetRandomValue(0,1);
+            switch (val)
+            {
+            case 0:
+                texture_num = 5;
+                break;
+            case 1:
+                texture_num = 5;
+                break;
+            default:
+                cout<<"ERROR: Choose failed for near, fast"<<endl;
+                break;
+            }
+        }
+    }
+    else{scrollspeed = 8; texture_num = 4;}
+}
+
+void Stars::update(float dt){
+    pos.y += scrollspeed*dt;
+    if(pos.y > screenHeight){ spawn(); }
+}
+
+void Stars::spawn(){
+    pos.x = GetRandomValue(0, screenWidth);
+    pos.y = GetRandomValue(-660,0);
+    Stars::choose();
+}
+
+void Stars::draw(Texture2D star_texture[StarTextures]){
+    DrawTexture(star_texture[texture_num], pos.x, pos.y, LIGHTGRAY);
 }
 
 void Etriangle(Vector2 vector, float radius, Color colour){
