@@ -4,25 +4,12 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include "Stars.h"
+
 #define MAX_BULLETS 5000
 #define MAX_STARS 20
-#define StarTextures 9
 
 using namespace std;
-
-class Stars{
-private:
-     Vector2 pos;
-    float scrollspeed;
-    int texture_num;
-    bool Far;
-    bool fast;
-public:
-    void spawn();
-    void update(float dt);
-    void choose();
-    void draw(Texture2D star_texture[StarTextures]);
-};
 
 struct Bullet {
     Vector2 position;
@@ -33,11 +20,6 @@ struct Bullet {
 };
 
 void Etriangle(Vector2 vector, float radius, Color colour);
-
-void swap(int i, int j);
-
-const int screenWidth = 800;
-const int screenHeight = 450;
 
 int main(){
 
@@ -51,6 +33,7 @@ int main(){
 
     uniform_int_distribution rndx(0, screenWidth);
     uniform_int_distribution rndy(0, screenHeight);
+    normal_distribution <float> nrdx(screenWidth/2.0f, screenWidth/6.0f);
 
     InitWindow(screenWidth, screenHeight, "Hellp");
     SetTargetFPS(current_fps);
@@ -97,7 +80,7 @@ int main(){
     EndTextureMode();
 
     for(int i=0; i<5; i++){
-        spawn.x = rndx(gen);
+        spawn.x = Clamp(nrdx(gen), 0, screenWidth);
         spawn.y = -5*rndy(gen)/screenHeight;
 
         bull[bulletcount].position = spawn;
@@ -143,7 +126,7 @@ int main(){
         if( alive == true && timer>=cooldown){
             timer = 0;
 
-            spawn.x = rndx(gen);
+            spawn.x = Clamp(nrdx(gen), 0, screenWidth);
             spawn.y = -5*rndy(gen)/screenHeight;
 
             float vel_x = GetRandomValue(0, velocity);
@@ -202,7 +185,7 @@ int main(){
         EndDrawing();
     }
 
-    for(int i=1; i<StarTextures; i++){
+    for(int i=0; i<StarTextures; i++){
         UnloadTexture(star_texture[i]);
     }
     UnloadRenderTexture(bulletTexture);
@@ -215,61 +198,6 @@ int main(){
     return 0;
 }
 
-void Stars::choose(){
-    fast = GetRandomValue(0,1);
-    Far = GetRandomValue(0,1);
-
-    if(fast == true){
-        scrollspeed = 12;
-        if(Far == true){
-            int val = GetRandomValue(0,1);
-            switch (val)
-            {
-            case 0:
-                texture_num = 2;
-                break;
-            case 1:
-                texture_num = 3;
-                break;
-            default:
-                cout<<"ERROR: Choose failed for far, fast"<<endl;
-                break;
-            }
-        }
-        else{
-            int val = GetRandomValue(0,1);
-            switch (val)
-            {
-            case 0:
-                texture_num = 5;
-                break;
-            case 1:
-                texture_num = 5;
-                break;
-            default:
-                cout<<"ERROR: Choose failed for near, fast"<<endl;
-                break;
-            }
-        }
-    }
-    else{scrollspeed = 8; texture_num = 4;}
-}
-
-void Stars::update(float dt){
-    pos.y += scrollspeed*dt;
-    if(pos.y > screenHeight){ spawn(); }
-}
-
-void Stars::spawn(){
-    pos.x = GetRandomValue(0, screenWidth);
-    pos.y = GetRandomValue(-660,0);
-    Stars::choose();
-}
-
-void Stars::draw(Texture2D star_texture[StarTextures]){
-    DrawTexture(star_texture[texture_num], pos.x, pos.y, LIGHTGRAY);
-}
-
 void Etriangle(Vector2 vector, float radius, Color colour){
     Vector2 Vr = {0, (float) -radius};
     Vector2 v1 = Vector2Add(vector, Vr);
@@ -279,11 +207,4 @@ void Etriangle(Vector2 vector, float radius, Color colour){
     Vector2 v3 = Vector2Add(vector, Vr);
 
     DrawTriangle(v1, v3, v2, colour);
-}
-
-void swap(int i, int j){
-    int temp;
-
-    temp = i;
-    i=j; j=temp;
 }
