@@ -56,12 +56,12 @@ int main(){
     Vector2 spawn = {0, 0};
     int bulletcount = 0;
     int bulletDisabled = 0;
-    float cooldown = 0.1;
+    float cooldown = 0.08;
     float timer=cooldown;
     Color bullet_color = YELLOW;
 
     //Player
-    int velocity = 10;
+    int velocity = 12;
     float spedmult = 4.59;
     bool alive = true;
     bool immune = false;
@@ -126,15 +126,18 @@ int main(){
         if( alive == true && timer>=cooldown){
             timer = 0;
 
-            spawn.x = Clamp(nrdx(gen), 0, screenWidth);
-            spawn.y = -5*rndy(gen)/screenHeight;
+            spawn.x = GetRandomValue(0, screenWidth);
+            spawn.y = -GetRandomValue(1, 5);
 
-            float vel_x = GetRandomValue(0, velocity);
-            float vel_y = GetRandomValue(0.9*velocity, 2.9*velocity);
+            normal_distribution <float> ntheta(0, (float)(1.8f/2.0f)*PI);
+
+            Vector2 v = Vector2Normalize((Circle, spawn));
+            v = Vector2Rotate(v,Clamp(ntheta(gen)+GetRandomValue(-0.0001*PI, 0.0001*PI), -(0.8)*PI, (0.8)*PI));
+            v = Vector2Scale(v, (float) 0.2*GetRandomValue(100,2000));
 
             if(bulletcount<MAX_BULLETS){
                 bull[bulletcount].position = spawn;
-                bull[bulletcount].velocity = (Vector2){(float) 10.0*vel_x,(float)10.0*vel_y};
+                bull[bulletcount].velocity = v;
                 bull[bulletcount].disabled= false;
                 bull[bulletcount].colour = bullet_color;
                 
@@ -144,8 +147,9 @@ int main(){
 
         for(int i=0; i<bulletcount; i++){
             if(alive==true && !bull[i].disabled){
-                bull[i].position.x += GetFrameTime()*bull[i].velocity.x;
-                bull[i].position.y += GetFrameTime()*bull[i].velocity.y;
+                bull[i].position = Vector2Add(bull[i].position, Vector2Scale(bull[i].velocity, dt));
+                bull[i].velocity = Vector2Subtract(bull[i].velocity, Vector2Scale(bull[i].velocity, 0.0001*dt));
+
                 if(Vector2Length(Vector2Subtract(Circle, bull[i].position)) <= 6 & immune==false ){alive = false;}
                 if(bull[i].position.x < 0 | bull[i].position.x > screenWidth){ bull[i].disabled = true; }
                 else{
