@@ -10,6 +10,12 @@ random_device rd;
 mt19937 gen(rd());
 normal_distribution <float> nrdx(screenWidth/2.0f, screenWidth/6.0f);
 
+void Stars::spawn(){
+    pos.x = Clamp(nrdx(gen), 0, screenWidth);
+    pos.y = GetRandomValue(-660,0);
+    Stars::choose();
+}
+
 void Stars::choose(){
     fast = GetRandomValue(0,1);
     Far = GetRandomValue(0,1);
@@ -53,12 +59,6 @@ void Stars::choose(){
 void Stars::update(float dt){
     pos.y += scrollspeed*dt;
     if(pos.y > screenHeight){ spawn(); }
-}
-
-void Stars::spawn(){
-    pos.x = Clamp(nrdx(gen), 0, screenWidth);
-    pos.y = GetRandomValue(-660,0);
-    Stars::choose();
 }
 
 void Stars::draw(Texture2D star_texture[StarTextures]){

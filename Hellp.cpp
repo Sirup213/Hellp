@@ -5,19 +5,12 @@
 #include <raymath.h>
 
 #include "Stars.h"
+#include "Bullet.h"
 
 #define MAX_BULLETS 5000
 #define MAX_STARS 20
 
 using namespace std;
-
-struct Bullet {
-    Vector2 position;
-    Vector2 velocity;
-    bool disabled; /*i Am being Inclusive*/
-    bool spawned;
-    Color colour;
-};
 
 void Etriangle(Vector2 vector, float radius, Color colour);
 
@@ -51,9 +44,7 @@ int main(){
     Vector2 StarPos={screenWidth/2, 0};
 
     //Bullet
-    Bullet *bull = (Bullet *)RL_CALLOC(MAX_BULLETS, sizeof(Bullet));
-    int j = 0;
-    Vector2 spawn = {0, 0};
+    Bullet bullet[MAX_BULLETS];
     int bulletcount = 0;
     int bulletDisabled = 0;
     float cooldown = 0.08;
@@ -80,15 +71,7 @@ int main(){
     EndTextureMode();
 
     for(int i=0; i<5; i++){
-        spawn.x = Clamp(nrdx(gen), 0, screenWidth);
-        spawn.y = -5*rndy(gen)/screenHeight;
-
-        bull[bulletcount].position = spawn;
-        bull[bulletcount].velocity = (Vector2){(float)2.0*GetRandomValue(0, velocity),(float)2.8*GetRandomValue(0.8*velocity, 2.9*velocity)};
-        bull[bulletcount].disabled= false;
-        bull[bulletcount].colour = bullet_color;
-        
-        bulletcount++;
+        bullet[i].spawntop(bulletcount, bulletTexture.texture, Circle, true);
     }
 
     for(int i=0; i<20;i++){
@@ -126,35 +109,14 @@ int main(){
         if( alive == true && timer>=cooldown){
             timer = 0;
 
-            spawn.x = GetRandomValue(0, screenWidth);
-            spawn.y = -GetRandomValue(1, 5);
-
-            normal_distribution <float> ntheta(0, (float)(1.8f/2.0f)*PI);
-
-            Vector2 v = Vector2Normalize((Circle, spawn));
-            v = Vector2Rotate(v,Clamp(ntheta(gen)+GetRandomValue(-0.0001*PI, 0.0001*PI), -(0.8)*PI, (0.8)*PI));
-            v = Vector2Scale(v, (float) 0.2*GetRandomValue(100,2000));
-
-            if(bulletcount<MAX_BULLETS){
-                bull[bulletcount].position = spawn;
-                bull[bulletcount].velocity = v;
-                bull[bulletcount].disabled= false;
-                bull[bulletcount].colour = bullet_color;
-                
-                bulletcount++;
+            if(bulletcount < MAX_BULLETS){
+                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, true);
             }
         }
 
         for(int i=0; i<bulletcount; i++){
-            if(alive==true && !bull[i].disabled){
-                bull[i].position = Vector2Add(bull[i].position, Vector2Scale(bull[i].velocity, dt));
-                bull[i].velocity = Vector2Subtract(bull[i].velocity, Vector2Scale(bull[i].velocity, 0.0001*dt));
-
-                if(Vector2Length(Vector2Subtract(Circle, bull[i].position)) <= 6 & immune==false ){alive = false;}
-                if(bull[i].position.x < 0 | bull[i].position.x > screenWidth){ bull[i].disabled = true; }
-                else{
-                    if(bull[i].position.y > screenHeight){ bull[i].disabled = true; }
-                }
+            if(alive==true && !bullet[i].GetDisabled()){
+                bullet[i].update(dt, Circle, immune, alive);
             }
         }
 
@@ -174,8 +136,8 @@ int main(){
         Etriangle(Circle, 8, BLUE);
 
         for(int i=0; i<bulletcount; i++){
-            if(!bull[i].disabled){
-                DrawTexture(bulletTexture.texture, bull[i].position.x - bulletTexture.texture.width/2, bull[i].position.y - bulletTexture.texture.height/2, bull[i].colour);
+            if(!bullet[i].GetDisabled()){
+                bullet[i].draw();
             }
         }
         
@@ -194,7 +156,6 @@ int main(){
     }
     UnloadRenderTexture(bulletTexture);
 
-    RL_FREE(bull);
     RL_FREE(star);
 
     CloseWindow();
