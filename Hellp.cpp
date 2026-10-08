@@ -16,8 +16,8 @@ void Etriangle(Vector2 vector, float radius, Color colour);
 
 int main(){
 
-    random_device rd;
-    mt19937 gen(rd());
+    random_device rdseed;
+    mt19937 gene(rdseed());
 
     const int screenWidth = 800;
     const int screenHeight = 450; 
@@ -110,13 +110,14 @@ int main(){
             timer = 0;
 
             if(bulletcount < MAX_BULLETS){
-                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, true);
+                int val = GetRandomValue(0, 5)/5.0f;
+                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val);
             }
         }
 
         for(int i=0; i<bulletcount; i++){
             if(alive==true && !bullet[i].GetDisabled()){
-                bullet[i].update(dt, Circle, immune, alive);
+                bullet[i].update(GetFrameTime(), Circle, immune, alive);
             }
         }
 

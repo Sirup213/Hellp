@@ -45,7 +45,7 @@ void Stars::choose(){
                 texture_num = 5;
                 break;
             case 1:
-                texture_num = 5;
+                texture_num = 6;
                 break;
             default:
                 cout<<"ERROR: Choose failed for near, fast"<<endl;
@@ -53,7 +53,21 @@ void Stars::choose(){
             }
         }
     }
-    else{scrollspeed = 8; texture_num = 4;}
+    else{
+        scrollspeed = 8;
+        int val = GetRandomValue(0,1);
+        switch (val)
+        {
+        case 0:
+            texture_num = 4;
+            break;
+        case 1:
+            texture_num = 6;
+            break;
+        default:
+            break;
+        } 
+    }
 }
 
 void Stars::update(float dt){

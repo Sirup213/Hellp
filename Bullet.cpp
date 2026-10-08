@@ -4,10 +4,13 @@
 #include <raymath.h>
 #include "Bullet.h"
 
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_real_distribution <float> rndx(0, screenWidth);
-std::uniform_real_distribution <float> y(-10, 0);
+static std::random_device rd;
+static std::mt19937 gen;
+static std::uniform_real_distribution <float> rndx(0, screenWidth);
+static std::uniform_real_distribution <float> y(-10, 0);
+static std::normal_distribution <float> speed(210, 10);
+static std::normal_distribution <float> ntheta(0, (float)(1.0f/2.0f)*PI);
+static std::uniform_real_distribution <float> One(-1,1); 
 
 bool Bullet::GetDisabled(){
     return disabled;
@@ -15,14 +18,15 @@ bool Bullet::GetDisabled(){
 
 void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targeted){
     position = {rndx(gen), y(gen)};
+
     if(targeted = true){
+    velocity = Vector2Normalize(Vector2Subtract(Circle, position));
+    velocity = Vector2Rotate(velocity,Clamp(ntheta(gen), -(0.8)*PI, (0.8)*PI));
+    velocity = Vector2Scale(velocity, Clamp(speed(gen), 10, 400));
     }
-    std::normal_distribution <float> ntheta(0, (float)(1.8f/2.0f)*PI);
-
-    Vector2 velocity = Vector2Normalize((Circle, position));
-    velocity = Vector2Rotate(velocity,Clamp(ntheta(gen)+GetRandomValue(-0.0001*PI, 0.0001*PI), -(0.8)*PI, (0.8)*PI));
-    velocity = Vector2Scale(velocity, (float) 0.2*GetRandomValue(100,2000));
-
+    else{
+        velocity = Vector2Scale({Clamp(One(gen), -0.88, 0.88), Clamp(One(gen), -0.88, 0.88)}, (float) Clamp(speed(gen), 10, 400)/Vector2LengthSqr({1,1}));
+    }
     disabled = false;
     texture = tex;
     color = YELLOW;
