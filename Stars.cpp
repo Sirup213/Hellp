@@ -10,6 +10,12 @@ random_device rd;
 mt19937 gen(rd());
 normal_distribution <float> nrdx(screenWidth/2.0f, screenWidth/6.0f);
 
+void Stars::spawn(){
+    pos.x = Clamp(nrdx(gen), 0, screenWidth);
+    pos.y = GetRandomValue(-660,0);
+    Stars::choose();
+}
+
 void Stars::choose(){
     fast = GetRandomValue(0,1);
     Far = GetRandomValue(0,1);
@@ -39,7 +45,7 @@ void Stars::choose(){
                 texture_num = 5;
                 break;
             case 1:
-                texture_num = 5;
+                texture_num = 6;
                 break;
             default:
                 cout<<"ERROR: Choose failed for near, fast"<<endl;
@@ -47,18 +53,26 @@ void Stars::choose(){
             }
         }
     }
-    else{scrollspeed = 8; texture_num = 4;}
+    else{
+        scrollspeed = 8;
+        int val = GetRandomValue(0,1);
+        switch (val)
+        {
+        case 0:
+            texture_num = 4;
+            break;
+        case 1:
+            texture_num = 6;
+            break;
+        default:
+            break;
+        } 
+    }
 }
 
 void Stars::update(float dt){
     pos.y += scrollspeed*dt;
     if(pos.y > screenHeight){ spawn(); }
-}
-
-void Stars::spawn(){
-    pos.x = Clamp(nrdx(gen), 0, screenWidth);
-    pos.y = GetRandomValue(-660,0);
-    Stars::choose();
 }
 
 void Stars::draw(Texture2D star_texture[StarTextures]){

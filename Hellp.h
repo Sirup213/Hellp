@@ -2,7 +2,7 @@
 
 #define HELLP_H
 
-#define StarTextures 9
+#define StarTextures 8
 
 const int screenWidth = 800;
 const int screenHeight = 450;
