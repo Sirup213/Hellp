@@ -14,6 +14,8 @@ using namespace std;
 
 void Etriangle(Vector2 vector, float radius, Color colour);
 
+Vector2 Scorebox_spawn(int &Length);
+
 int main(){
 
     const int screenWidth = 800;
@@ -44,6 +46,15 @@ int main(){
     bool immune = false;
     float spawn_immunity = 2;
     float immune_timer = 0;
+
+    //Score
+    float Score = 0;
+    Vector2 Score_box_position = {0,0};
+    float Score_timer = 0;
+    float Score_time = 1;
+    int Length = 0;
+    bool active;
+    bool exist;
 
     //Bullet
     Bullet bullet[MAX_BULLETS];
@@ -95,6 +106,12 @@ int main(){
             for(int i=0;i<starcount;i++){
                 star[i].update(dt);
             }
+
+            if(!exist){
+                Score_box_position = Scorebox_spawn(Length);
+                exist = true;
+                std::cout<<Score<<std::endl;
+            }
         }
 
         if(bulletcount>= MAX_BULLETS){
@@ -109,14 +126,35 @@ int main(){
             timer = 0;
 
             if(bulletcount < MAX_BULLETS){
-                int val = GetRandomValue(0, 23)/23.0f;
+                int val = 0;
+                if(active){val = GetRandomValue(0, 5)/5.0f; cooldown = 0.8;}
+                else{val = GetRandomValue(0, 23)/23.0f; cooldown = 0.08;}
                 bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val);
+            }
+        }
+
+        if(exist){
+            if(abs(Score_box_position.x - (int)Circle.x)<=Length/2 && abs(Score_box_position.y - (int) Circle.y )<=Length/2){
+                active = true;
+            }
+            if(active){
+                if(alive){
+                    Score++;
+                }
+                else if(abs(Score_box_position.x - Circle.x)>Length/2 || abs(Score_box_position.y - Circle.y )>Length/2){
+                    active = false;
+                    exist = false;
+                }
             }
         }
 
         for(int i=0; i<bulletcount; i++){
             if(alive==true && !bullet[i].GetDisabled()){
-                bullet[i].update(GetFrameTime(), Circle, immune, alive);
+                int disabled = bulletDisabled;
+                bullet[i].update(bulletDisabled , GetFrameTime(), Circle, immune, alive);
+                if(disabled != bulletDisabled){
+                    bullet[i].swapdata(bullet[bulletDisabled-1]);
+                }
             }
         }
 
@@ -132,6 +170,12 @@ int main(){
         DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({0, screenHeight}, {screenWidth, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
+
+        
+        DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
+        if(exist){
+            DrawRectangle(Score_box_position.x - Length/2, Score_box_position.y - Length/2, Length, Length, {200, 200, 200, 100});
+        }
 
         Etriangle(Circle, 8, BLUE);
 
@@ -163,6 +207,21 @@ int main(){
     CloseWindow();
 
     return 0;
+}
+
+Vector2 Scorebox_spawn(int &Length){
+    random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution  X(0+Length, screenWidth-Length);
+    std::uniform_int_distribution  Y(0+Length, screenHeight-Length);
+
+    int x = X(gen);
+    int y = Y(gen);
+    Vector2 v = {(float) x, (float) y};
+    Length = GetRandomValue(40,60);
+
+    std::cout<<"("<<v.x<<","<<v.y<<")"<<std::endl;
+    return v;
 }
 
 void Etriangle(Vector2 vector, float radius, Color colour){

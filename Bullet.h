@@ -16,11 +16,14 @@ private:
     bool spawned;
     Color color;
 public:
+    Bullet(){}
+    ~Bullet(){}
     bool GetDisabled();
     void spawntop(int &bulletcount, Texture2D texture, Vector2 Circle, bool targeted = false);
     void draw();
-    void update(float dt, Vector2 Circle, bool immune, bool& alive);
+    void update(int &bulletdisabled, float dt, Vector2 Circle, bool immune, bool& alive);
     void trail(int stepsize , int length = 4, int skip = 1);
+    void swapdata(Bullet &bullet);
 };
 
 #endif

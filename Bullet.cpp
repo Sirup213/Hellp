@@ -35,15 +35,15 @@ void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targ
     bulletcount++;
 }
 
-void Bullet::update(float dt, Vector2 Circle, bool immune, bool& alive){
+void Bullet::update(int &bulletdisabled, float dt, Vector2 Circle, bool immune, bool& alive){
     pastpos = position;
     position = Vector2Add(position, Vector2Scale(velocity, dt));
     velocity = Vector2Subtract(velocity, Vector2Scale(velocity, 0.0001*dt));
 
     if(Vector2Length(Vector2Subtract(Circle, position)) <= 6 & immune==false ){alive = false;}
-    if(position.x < 0 | position.x > screenWidth){ disabled = true; }
+    if(position.x < 0 | position.x > screenWidth){ disabled = true; bulletdisabled++; }
     else{
-        if(position.y > screenHeight){ disabled = true; }
+        if(position.y > screenHeight){ disabled = true; bulletdisabled++; }
     }
 }
 
@@ -66,4 +66,13 @@ void Bullet::trail(int stepsize, int length, int skip){
         DrawTexture(texture, (position.x + stepI.x) - texture.width/2, (position.y+stepI.y) - texture.height/2, trail_colour);
         trail_colour.a = trail_colour.a*0.8625;
     }
+}
+
+void Bullet::swapdata(Bullet &bullet){
+    using std::swap;
+    swap(position, bullet.position);
+    swap(pastpos, bullet.pastpos);
+    swap(velocity, bullet.velocity);
+    swap(texture, bullet.texture);
+    swap(disabled, bullet.disabled);
 }
