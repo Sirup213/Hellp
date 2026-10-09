@@ -31,6 +31,7 @@ void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targ
     disabled = false;
     texture = tex;
     color = YELLOW;
+    radius = tex.width/2;
 
     bulletcount++;
 }
@@ -40,7 +41,7 @@ void Bullet::update(int &bulletdisabled, float dt, Vector2 Circle, bool immune, 
     position = Vector2Add(position, Vector2Scale(velocity, dt));
     velocity = Vector2Subtract(velocity, Vector2Scale(velocity, 0.0001*dt));
 
-    if(Vector2Length(Vector2Subtract(Circle, position)) <= 6 & immune==false ){alive = false;}
+    if(Vector2Length(Vector2Subtract(Circle, position)) <= 4+radius & immune==false ){alive = false;}
     if(position.x < 0 | position.x > screenWidth){ disabled = true; bulletdisabled++; }
     else{
         if(position.y > screenHeight){ disabled = true; bulletdisabled++; }

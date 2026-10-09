@@ -41,7 +41,7 @@ int main(){
     //Player
     Vector2 velocity = {0, 0};
     int speed = 12;
-    float spedmult = 4.59;
+    float spedmult = 10;
     bool alive = true;
     bool immune = false;
     float spawn_immunity = 2;
@@ -134,14 +134,14 @@ int main(){
         }
 
         if(exist){
-            if(abs(Score_box_position.x - (int)Circle.x)<=Length/2 && abs(Score_box_position.y - (int) Circle.y )<=Length/2){
+            if(abs(Score_box_position.x - Circle.x)<=Length/2 && abs(Score_box_position.y - Circle.y )<=Length/2){
                 active = true;
             }
             if(active){
                 if(alive){
                     Score++;
                 }
-                else if(abs(Score_box_position.x - Circle.x)>Length/2 || abs(Score_box_position.y - Circle.y )>Length/2){
+                if(timer > 0.6 && abs(Score_box_position.x - Circle.x)>Length/2 || abs(Score_box_position.y - Circle.y )>Length/2){
                     active = false;
                     exist = false;
                 }
@@ -174,7 +174,7 @@ int main(){
         
         DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
         if(exist){
-            DrawRectangle(Score_box_position.x - Length/2, Score_box_position.y - Length/2, Length, Length, {200, 200, 200, 100});
+            DrawRectangle(Score_box_position.x - Length/2, Score_box_position.y - Length/2, Length, Length, {200, 200, 200, 90});
         }
 
         Etriangle(Circle, 8, BLUE);
