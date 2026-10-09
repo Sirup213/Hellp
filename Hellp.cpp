@@ -37,7 +37,8 @@ int main(){
     Vector2 StarPos={screenWidth/2, 0};
 
     //Player
-    int velocity = 12;
+    Vector2 velocity = {0, 0};
+    int speed = 12;
     float spedmult = 4.59;
     bool alive = true;
     bool immune = false;
@@ -80,10 +81,15 @@ int main(){
         else{immune_timer=0; immune=false;}
         if(alive){
             //Player
-            if(IsKeyDown(KEY_W)==true){ Circle.y -= dt*spedmult*velocity;}
-            if(IsKeyDown(KEY_A)==true){ Circle.x -= dt*spedmult*velocity;}
-            if(IsKeyDown(KEY_S)==true){ Circle.y += dt*spedmult*velocity;}
-            if(IsKeyDown(KEY_D)==true){ Circle.x += dt*spedmult*velocity;}
+            if(IsKeyDown(KEY_S)==true){ velocity.y = 1;}
+            else if(IsKeyDown(KEY_W)==true){ velocity.y = -1;}
+            else { velocity.y =0; }
+            if(IsKeyDown(KEY_D)==true){ velocity.x = 1;}
+            else if(IsKeyDown(KEY_A)==true){ velocity.x = -1;}
+            else { velocity.x = 0; }
+            velocity = Vector2Normalize(velocity);
+            velocity = Vector2Scale(velocity, speed);
+            Circle = Vector2Add(Circle, Vector2Scale(velocity, spedmult*dt));
 
             //Star
             for(int i=0;i<starcount;i++){
