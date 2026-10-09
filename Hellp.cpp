@@ -16,22 +16,15 @@ void Etriangle(Vector2 vector, float radius, Color colour);
 
 int main(){
 
-    random_device rdseed;
-    mt19937 gene(rdseed());
-
     const int screenWidth = 800;
     const int screenHeight = 450; 
     const int fps=60;
     int current_fps=fps;
 
-    uniform_int_distribution rndx(0, screenWidth);
-    uniform_int_distribution rndy(0, screenHeight);
-    normal_distribution <float> nrdx(screenWidth/2.0f, screenWidth/6.0f);
-
     InitWindow(screenWidth, screenHeight, "Hellp");
     SetTargetFPS(current_fps);
 
-    Color BG = {0,0,0,255};
+    Color BG = {0,0,0,150};
 
     Texture2D star_texture[StarTextures];
     for(int i=0; i<StarTextures; i++){
@@ -43,14 +36,6 @@ int main(){
     Vector2 Circle={(float)screenWidth/2.0f, (float)screenHeight/2.0f};
     Vector2 StarPos={screenWidth/2, 0};
 
-    //Bullet
-    Bullet bullet[MAX_BULLETS];
-    int bulletcount = 0;
-    int bulletDisabled = 0;
-    float cooldown = 0.08;
-    float timer=cooldown;
-    Color bullet_color = YELLOW;
-
     //Player
     int velocity = 12;
     float spedmult = 4.59;
@@ -59,19 +44,27 @@ int main(){
     float spawn_immunity = 2;
     float immune_timer = 0;
 
+    //Bullet
+    Bullet bullet[MAX_BULLETS];
+    int bulletcount = 0;
+    int bulletDisabled = 0;
+    float cooldown = 0.08;
+    float timer=cooldown;
+    Color bullet_color = YELLOW;
+
     //Star
     Stars *star = (Stars *)RL_CALLOC(MAX_STARS, sizeof(Stars));
     int starcount=0;
     float scrollspeed = 8;
 
-    RenderTexture bulletTexture = LoadRenderTexture(6,6);
+    RenderTexture bulletTexture = LoadRenderTexture(5,5);
 
     BeginTextureMode(bulletTexture);
         DrawCircle(bulletTexture.texture.width/2,bulletTexture.texture.height/2,(float)2, YELLOW);
     EndTextureMode();
 
     for(int i=0; i<5; i++){
-        bullet[i].spawntop(bulletcount, bulletTexture.texture, Circle, true);
+        bullet[i].spawntop(bulletcount, bulletTexture.texture, Circle, false);
     }
 
     for(int i=0; i<20;i++){
@@ -110,7 +103,7 @@ int main(){
             timer = 0;
 
             if(bulletcount < MAX_BULLETS){
-                int val = GetRandomValue(0, 5)/5.0f;
+                int val = GetRandomValue(0, 23)/23.0f;
                 bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val);
             }
         }
@@ -139,6 +132,8 @@ int main(){
         for(int i=0; i<bulletcount; i++){
             if(!bullet[i].GetDisabled()){
                 bullet[i].draw();
+                if(alive){}
+                bullet[i].trail(6);
             }
         }
         

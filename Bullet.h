@@ -8,6 +8,7 @@
 class Bullet{
 private:
     Vector2 position;
+    Vector2 pastpos;
     Vector2 velocity;
     Texture2D texture;
     float radius;
@@ -19,6 +20,7 @@ public:
     void spawntop(int &bulletcount, Texture2D texture, Vector2 Circle, bool targeted = false);
     void draw();
     void update(float dt, Vector2 Circle, bool immune, bool& alive);
+    void trail(int stepsize , int length = 4, int skip = 1);
 };
 
 #endif

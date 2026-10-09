@@ -18,6 +18,7 @@ bool Bullet::GetDisabled(){
 
 void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targeted){
     position = {rndx(gen), y(gen)};
+    radius = 3;
 
     if(targeted = true){
     velocity = Vector2Normalize(Vector2Subtract(Circle, position));
@@ -35,6 +36,7 @@ void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targ
 }
 
 void Bullet::update(float dt, Vector2 Circle, bool immune, bool& alive){
+    pastpos = position;
     position = Vector2Add(position, Vector2Scale(velocity, dt));
     velocity = Vector2Subtract(velocity, Vector2Scale(velocity, 0.0001*dt));
 
@@ -47,4 +49,21 @@ void Bullet::update(float dt, Vector2 Circle, bool immune, bool& alive){
 
 void Bullet::draw(){
     DrawTexture(texture, position.x - texture.width/2, position.y - texture.height/2, color);
+}
+
+void Bullet::trail(int stepsize, int length, int skip){
+    Vector2 diff = Vector2Subtract(pastpos, position);
+
+    if(Vector2Length(diff) < 1){return;}
+
+    Vector2 step = Vector2Scale(diff, (float)1/stepsize);
+    Color trail_colour = color;
+
+    for(int i=0; i < 4*stepsize ; i+=skip){
+        if(trail_colour.a < 2){break;}
+        Vector2 stepI = Vector2Scale(step, i);
+
+        DrawTexture(texture, (position.x + stepI.x) - texture.width/2, (position.y+stepI.y) - texture.height/2, trail_colour);
+        trail_colour.a = trail_colour.a*0.8625;
+    }
 }
