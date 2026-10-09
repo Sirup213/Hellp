@@ -41,7 +41,7 @@ int main(){
     //Player
     Vector2 velocity = {0, 0};
     int speed = 12;
-    float spedmult = 10;
+    float spedmult = 5;
     bool alive = true;
     bool immune = false;
     float spawn_immunity = 2;
@@ -127,7 +127,7 @@ int main(){
 
             if(bulletcount < MAX_BULLETS){
                 int val = 0;
-                if(active){val = GetRandomValue(0, 5)/5.0f; cooldown = 0.8;}
+                if(active){val = GetRandomValue(0, 1); cooldown = 0.1;}
                 else{val = GetRandomValue(0, 23)/23.0f; cooldown = 0.08;}
                 bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val);
             }
