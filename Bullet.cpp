@@ -16,22 +16,28 @@ bool Bullet::GetDisabled(){
     return disabled;
 }
 
-void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targeted){
+void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targeted, bool active){
     position = {rndx(gen), y(gen)};
-    radius = 3;
 
     if(targeted = true){
     velocity = Vector2Normalize(Vector2Subtract(Circle, position));
     velocity = Vector2Rotate(velocity,Clamp(ntheta(gen), -(0.8)*PI, (0.8)*PI));
-    velocity = Vector2Scale(velocity, Clamp(speed(gen), 10, 400));
     }
     else{
-        velocity = Vector2Scale({Clamp(One(gen), -0.88, 0.88), Clamp(One(gen), -0.88, 0.88)}, (float) Clamp(speed(gen), 10, 400)/Vector2LengthSqr({1,1}));
+        velocity.x = Clamp(One(gen), -0.88, 0.88);
+        velocity.y = Clamp(One(gen), -0.88, 0.88);
+        velocity = Vector2Normalize(velocity);
     }
+    radius = 3;
+    velocity = Vector2Scale(velocity, Clamp(speed(gen), 10, 400));
+
+    if(!active){}
+    else{}
+
+
     disabled = false;
     texture = tex;
     color = YELLOW;
-    radius = tex.width/2;
 
     bulletcount++;
 }
@@ -49,7 +55,10 @@ void Bullet::update(int &bulletdisabled, float dt, Vector2 Circle, bool immune, 
 }
 
 void Bullet::draw(){
-    DrawTexture(texture, position.x - texture.width/2, position.y - texture.height/2, color);
+    DrawTexturePro(texture,
+        {0, 0, (float)texture.width, (float)texture.height},
+        {position.x - radius, position.y - radius, 2.0f*radius, 2.0f*radius},
+        {0, 0}, 0, color);
 }
 
 void Bullet::trail(int stepsize, int length, int skip){
@@ -64,7 +73,10 @@ void Bullet::trail(int stepsize, int length, int skip){
         if(trail_colour.a < 2){break;}
         Vector2 stepI = Vector2Scale(step, i);
 
-        DrawTexture(texture, (position.x + stepI.x) - texture.width/2, (position.y+stepI.y) - texture.height/2, trail_colour);
+        DrawTexturePro(texture,
+        {0, 0, (float)texture.width, (float)texture.height},
+        {(position.x + stepI.x) - radius, (position.y+stepI.y) - radius, 2.0f*radius, 2.0f*radius},
+        {0, 0}, 0, trail_colour);
         trail_colour.a = trail_colour.a*0.8625;
     }
 }

@@ -52,6 +52,7 @@ int main(){
     Vector2 Score_box_position = {0,0};
     float Score_timer = 0;
     float Score_time = 1;
+    float Score_check = 0;
     int Length = 0;
     bool active;
     bool exist;
@@ -129,19 +130,23 @@ int main(){
                 int val = 0;
                 if(active){val = GetRandomValue(0, 1); cooldown = 0.1;}
                 else{val = GetRandomValue(0, 23)/23.0f; cooldown = 0.08;}
-                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val);
+                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val, active);
             }
         }
 
         if(exist){
-            if(abs(Score_box_position.x - Circle.x)<=Length/2 && abs(Score_box_position.y - Circle.y )<=Length/2){
-                active = true;
+            Score_check+=dt;
+            Score_timer+=dt;
+            if(!active){
+                if(abs(Score_box_position.x - Circle.x)<=Length/2 && abs(Score_box_position.y - Circle.y )<=Length/2){active = true;}
             }
-            if(active){
-                if(alive){
+            else if(active && Score_check > 0.1){
+                Score_check = 0;
+                Score_timer = 0;
+                if(alive && Score_timer > Score_time){
                     Score++;
                 }
-                if(timer > 0.6 && abs(Score_box_position.x - Circle.x)>Length/2 || abs(Score_box_position.y - Circle.y )>Length/2){
+                if(abs((int)Score_box_position.x -(int)Circle.x)>Length/2 || abs((int)Score_box_position.y - (int)Circle.y)>Length/2){
                     active = false;
                     exist = false;
                 }
