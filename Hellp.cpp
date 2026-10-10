@@ -142,8 +142,8 @@ int main(){
             }
             else if(active && Score_check > 0.1){
                 Score_check = 0;
-                Score_timer = 0;
                 if(alive && Score_timer > Score_time){
+                    Score_timer = 0;
                     Score++;
                 }
                 if(abs((int)Score_box_position.x -(int)Circle.x)>Length/2 || abs((int)Score_box_position.y - (int)Circle.y)>Length/2){
