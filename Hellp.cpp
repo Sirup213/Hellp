@@ -21,9 +21,10 @@ int main(){
     const int screenWidth = 800;
     const int screenHeight = 450; 
     const int fps=60;
+    const int Textarea = 100;
     int current_fps=fps;
 
-    InitWindow(screenWidth, screenHeight, "Hellp");
+    InitWindow(screenWidth + Textarea, screenHeight, "Hellp");
     SetTargetFPS(current_fps);
 
     Color BG = {0,0,0,150};
@@ -166,6 +167,8 @@ int main(){
         BeginDrawing();
 
         ClearBackground(BG);
+
+        DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
 
         for(int i=0; i<starcount;i++){
             star[i].draw(star_texture);
