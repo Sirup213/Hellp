@@ -21,20 +21,23 @@ int main(){
     const int screenWidth = 800;
     const int screenHeight = 450; 
     const int fps=60;
-    const int Textarea = 100;
+    const int Textarea = 240;
     int current_fps=fps;
-
+    //Starting the window
     InitWindow(screenWidth + Textarea, screenHeight, "Hellp");
     SetTargetFPS(current_fps);
 
     Color BG = {0,0,0,150};
-
+    //Textures
     Texture2D star_texture[StarTextures];
     for(int i=0; i<StarTextures; i++){
         Image Star = LoadImage(TextFormat("Assets/Stars/Star%02d.png",i));
         star_texture[i]=LoadTextureFromImage(Star);
         UnloadImage(Star);
     }
+    Image Spritesheet_of_John = LoadImage(TextFormat("Assets/Charactersprite00.png"));
+    Texture2D John = LoadTextureFromImage(Spritesheet_of_John);
+    UnloadImage(Spritesheet_of_John);
     
     Vector2 Circle={(float)screenWidth/2.0f, (float)screenHeight/2.0f};
     Vector2 StarPos={screenWidth/2, 0};
@@ -169,6 +172,7 @@ int main(){
         ClearBackground(BG);
 
         DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
+        DrawTexturePro(John, {0, 0, 16, 16}, {screenWidth+24, 24, 48, 48}, {0, 0}, 0, WHITE);
 
         for(int i=0; i<starcount;i++){
             star[i].draw(star_texture);
@@ -209,6 +213,7 @@ int main(){
         UnloadTexture(star_texture[i]);
     }
     UnloadRenderTexture(bulletTexture);
+    UnloadTexture(John);
 
     RL_FREE(star);
 
