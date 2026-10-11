@@ -5,7 +5,8 @@
 #include <raymath.h>
 
 #include "Stars.h"
-#include "Bullet.h"
+#include "Bullet.h" 
+#include "Hellp.h"
 
 #define MAX_BULLETS 5000
 #define MAX_STARS 20
@@ -23,10 +24,9 @@ struct Character
     Texture2D spritesheet;
     int expression;
 
-    Character(string n, string p){ name = n; Imagepath = p;}
+    Character(string n, string p){ name = n; Imagepath = p; expression = 0; }
     int move(){expression++; return expression%4;}
 };
-
 
 int main(){
 
@@ -41,12 +41,20 @@ int main(){
 
     Color BG = {0,0,0,150};
     //Textures
+    RenderTexture bulletTexture = LoadRenderTexture(5,5);
+    BeginTextureMode(bulletTexture);
+        DrawCircle(bulletTexture.texture.width/2,bulletTexture.texture.height/2,(float)2, YELLOW);
+    EndTextureMode();
     Texture2D star_texture[StarTextures];
     for(int i=0; i<StarTextures; i++){
         Image Star = LoadImage(TextFormat("Assets/Stars/Star%02d.png",i));
         star_texture[i]=LoadTextureFromImage(Star);
         UnloadImage(Star);
     }
+
+    Image Back = LoadImage("Assets/Stars/pixilart-animation.png");
+    Texture2D Starrysky = LoadTextureFromImage(Back);
+    UnloadImage(Back);
     
     //Character
     Character John("John", "Assets/Charactersprite00.png");
@@ -54,18 +62,11 @@ int main(){
     John.spritesheet = LoadTextureFromImage(characterimage);
     UnloadImage(characterimage);
 
-    
-    Vector2 Circle={(float)screenWidth/2.0f, (float)screenHeight/2.0f};
     Vector2 StarPos={screenWidth/2, 0};
 
-    //Player
-    Vector2 velocity = {0, 0};
-    int speed = 12;
-    float spedmult = 5;
-    bool alive = true;
-    bool immune = false;
+    //Player(Cam inside)
+    Player player(60, 1, 10);
     float spawn_immunity = 2;
-    float immune_timer = 0;
 
     //Score
     float Score = 0;
@@ -90,14 +91,8 @@ int main(){
     int starcount=0;
     float scrollspeed = 8;
 
-    RenderTexture bulletTexture = LoadRenderTexture(5,5);
-
-    BeginTextureMode(bulletTexture);
-        DrawCircle(bulletTexture.texture.width/2,bulletTexture.texture.height/2,(float)2, YELLOW);
-    EndTextureMode();
-
     for(int i=0; i<5; i++){
-        bullet[i].spawntop(bulletcount, bulletTexture.texture, Circle, false);
+        bullet[i].spawntop(bulletcount, bulletTexture.texture, player.position, false);
     }
 
     for(int i=0; i<20;i++){
@@ -108,20 +103,13 @@ int main(){
     while(!WindowShouldClose()){
 
         float dt = GetFrameTime();
+        if(player.iframes>0){player.iframes--;} 
 
-        if(immune_timer>0){ immune_timer -= (float) dt;}
-        else{immune_timer=0; immune=false;}
-        if(alive){
+        if(player.immune_timer>0){ player.immune_timer -= (float) dt;}
+        else{player.immune_timer=0; player.immune=false;}
+        if(player.alive){
             //Player
-            if(IsKeyDown(KEY_S)==true){ velocity.y = 1;}
-            else if(IsKeyDown(KEY_W)==true){ velocity.y = -1;}
-            else { velocity.y =0; }
-            if(IsKeyDown(KEY_D)==true){ velocity.x = 1;}
-            else if(IsKeyDown(KEY_A)==true){ velocity.x = -1;}
-            else { velocity.x = 0; }
-            velocity = Vector2Normalize(velocity);
-            velocity = Vector2Scale(velocity, speed);
-            Circle = Vector2Add(Circle, Vector2Scale(velocity, spedmult*dt));
+            player.position = Vector2Add(player.position, Vector2Scale(player.Movement(), dt));
 
             //Star
             for(int i=0;i<starcount;i++){
@@ -143,14 +131,14 @@ int main(){
 
         timer += (float) GetFrameTime();
         
-        if( alive == true && timer>=cooldown){
+        if( player.alive == true && timer>=cooldown){
             timer = 0;
 
             if(bulletcount < MAX_BULLETS){
                 int val = 0;
                 if(active){val = GetRandomValue(0, 1); cooldown = 0.1;}
                 else{val = GetRandomValue(0, 23)/23.0f; cooldown = 0.08;}
-                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, Circle, (bool) val, active);
+                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, player.position, (bool) val, active);
             }
         }
 
@@ -158,15 +146,15 @@ int main(){
             Score_check+=dt;
             Score_timer+=dt;
             if(!active){
-                if(abs(Score_box_position.x - Circle.x)<=Length/2 && abs(Score_box_position.y - Circle.y )<=Length/2){active = true;}
+                if(abs(Score_box_position.x - player.position.x)<=Length/2 && abs(Score_box_position.y - player.position.y )<=Length/2){active = true;}
             }
             else if(active && Score_check > 0.1){
                 Score_check = 0;
                 Score_timer = 0;
-                if(alive && Score_timer > Score_time){
+                if(player.alive && Score_timer > Score_time){
                     Score++;
                 }
-                if(abs((int)Score_box_position.x -(int)Circle.x)>Length/2 || abs((int)Score_box_position.y - (int)Circle.y)>Length/2){
+                if(abs((int)Score_box_position.x -(int)player.position.x)>Length/2 || abs((int)Score_box_position.y - (int)player.position.y)>Length/2){
                     active = false;
                     exist = false;
                 }
@@ -174,9 +162,9 @@ int main(){
         }
 
         for(int i=0; i<bulletcount; i++){
-            if(alive==true && !bullet[i].GetDisabled()){
+            if(player.alive==true && !bullet[i].GetDisabled()){
                 int disabled = bulletDisabled;
-                bullet[i].update(bulletDisabled , GetFrameTime(), Circle, immune, alive);
+                bullet[i].update(bulletDisabled , GetFrameTime(), player);
                 if(disabled != bulletDisabled){
                     bullet[i].swapdata(bullet[bulletDisabled-1]);
                 }
@@ -188,12 +176,16 @@ int main(){
         ClearBackground(BG);
 
         DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
-        if(IsKeyPressed(KEY_RIGHT)){John.expression = John.move();}
+        if(player.health==1){John.expression = 2;}
         DrawTexturePro(John.spritesheet, {(float)16*(John.expression), 0, 16, 16}, {screenWidth + 20, 20, 56, 56}, {0, 0}, 0, WHITE);
+        DrawRectangleRoundedLines({screenWidth+16, 15, 56+5, 56+5}, 0.5, 4, RAYWHITE);
+        DrawText("John", screenWidth+102, (15+15+56+5)/2.0f-16, 40, RAYWHITE);
 
         for(int i=0; i<starcount;i++){
             star[i].draw(star_texture);
         }
+        DrawTexturePro(Starrysky, {0, 0,(float)Starrysky.width,(float)Starrysky.height},
+            {0, 0,(float)Starrysky.width,(float)Starrysky.height}, {0, 0}, 0, WHITE);
 
         DrawLineBezier({0, 0}, {screenWidth, 0}, 7, DARKGRAY);
         DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
@@ -206,18 +198,19 @@ int main(){
             DrawRectangle(Score_box_position.x - Length/2, Score_box_position.y - Length/2, Length, Length, {200, 200, 200, 90});
         }
 
-        Etriangle(Circle, 8, BLUE);
+        Etriangle(player.position, player.radius, BLUE);
 
         for(int i=0; i<bulletcount; i++){
             if(!bullet[i].GetDisabled()){
                 bullet[i].draw();
-                if(alive){}
+                if(player.alive){}
                 bullet[i].trail(6);
             }
         }
         
-        if(IsKeyDown(KEY_R)){immune_timer=spawn_immunity; immune=true; alive = true; }
-        if(!alive){
+        if(IsKeyDown(KEY_R)){player.revive(spawn_immunity); John.expression=0;}
+        if(!player.alive){
+            John.expression = 3;
             DrawText("ded!", (int)screenWidth/2.0 , (int)screenHeight/2.0, 25, LIGHTGRAY);
         //I actually forgot to make him alive when cleaning code. So, he was just immortal & dead, which is famously a bad thing.
         //I just realized that I also forgot to make him immune. So, he was just dead. 
