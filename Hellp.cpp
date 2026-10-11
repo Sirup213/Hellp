@@ -150,8 +150,8 @@ int main(){
             }
             else if(active && Score_check > 0.1){
                 Score_check = 0;
-                Score_timer = 0;
                 if(player.alive && Score_timer > Score_time){
+                    Score_timer = 0;
                     Score++;
                 }
                 if(abs((int)Score_box_position.x -(int)player.position.x)>Length/2 || abs((int)Score_box_position.y - (int)player.position.y)>Length/2){
@@ -235,13 +235,13 @@ int main(){
 Vector2 Scorebox_spawn(int &Length){
     random_device rd;
     std::mt19937 gen(rd());
+    Length = GetRandomValue(40,60);
     std::uniform_int_distribution  X(0+Length, screenWidth-Length);
     std::uniform_int_distribution  Y(0+Length, screenHeight-Length);
 
     int x = X(gen);
     int y = Y(gen);
     Vector2 v = {(float) x, (float) y};
-    Length = GetRandomValue(40,60);
 
     std::cout<<"("<<v.x<<","<<v.y<<")"<<std::endl;
     return v;
