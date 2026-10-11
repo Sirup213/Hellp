@@ -184,8 +184,6 @@ int main(){
         for(int i=0; i<starcount;i++){
             star[i].draw(star_texture);
         }
-        DrawTexturePro(Starrysky, {0, 0,(float)Starrysky.width,(float)Starrysky.height},
-            {0, 0,(float)Starrysky.width,(float)Starrysky.height}, {0, 0}, 0, WHITE);
 
         DrawLineBezier({0, 0}, {screenWidth, 0}, 7, DARKGRAY);
         DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
