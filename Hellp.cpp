@@ -16,6 +16,18 @@ void Etriangle(Vector2 vector, float radius, Color colour);
 
 Vector2 Scorebox_spawn(int &Length);
 
+struct Character
+{
+    string name;
+    string Imagepath;
+    Texture2D spritesheet;
+    int expression;
+
+    Character(string n, string p){ name = n; Imagepath = p;}
+    int move(){expression++; return expression%4;}
+};
+
+
 int main(){
 
     const int screenWidth = 800;
@@ -35,9 +47,13 @@ int main(){
         star_texture[i]=LoadTextureFromImage(Star);
         UnloadImage(Star);
     }
-    Image Spritesheet_of_John = LoadImage(TextFormat("Assets/Charactersprite00.png"));
-    Texture2D John = LoadTextureFromImage(Spritesheet_of_John);
-    UnloadImage(Spritesheet_of_John);
+    
+    //Character
+    Character John("John", "Assets/Charactersprite00.png");
+    Image characterimage = LoadImage(TextFormat(John.Imagepath.data()));
+    John.spritesheet = LoadTextureFromImage(characterimage);
+    UnloadImage(characterimage);
+
     
     Vector2 Circle={(float)screenWidth/2.0f, (float)screenHeight/2.0f};
     Vector2 StarPos={screenWidth/2, 0};
@@ -58,8 +74,8 @@ int main(){
     float Score_time = 1;
     float Score_check = 0;
     int Length = 0;
-    bool active;
-    bool exist;
+    bool active = false;
+    bool exist = false;
 
     //Bullet
     Bullet bullet[MAX_BULLETS];
@@ -172,7 +188,8 @@ int main(){
         ClearBackground(BG);
 
         DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
-        DrawTexturePro(John, {0, 0, 16, 16}, {screenWidth+24, 24, 48, 48}, {0, 0}, 0, WHITE);
+        if(IsKeyPressed(KEY_RIGHT)){John.expression = John.move();}
+        DrawTexturePro(John.spritesheet, {(float)16*(John.expression), 0, 16, 16}, {screenWidth + 20, 20, 56, 56}, {0, 0}, 0, WHITE);
 
         for(int i=0; i<starcount;i++){
             star[i].draw(star_texture);
@@ -213,7 +230,7 @@ int main(){
         UnloadTexture(star_texture[i]);
     }
     UnloadRenderTexture(bulletTexture);
-    UnloadTexture(John);
+    UnloadTexture(John.spritesheet);
 
     RL_FREE(star);
 
