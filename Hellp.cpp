@@ -15,7 +15,7 @@ using namespace std;
 
 void Etriangle(Vector2 vector, float radius, Color colour);
 
-Vector2 Scorebox_spawn(int &Length);
+Vector2 Scorebox_spawn(int &Length, int tolerance);
 
 struct Character
 {
@@ -117,7 +117,7 @@ int main(){
             }
 
             if(!exist){
-                Score_box_position = Scorebox_spawn(Length);
+                Score_box_position = Scorebox_spawn(Length, 20-);
                 exist = true;
                 std::cout<<Score<<std::endl;
             }
@@ -230,17 +230,16 @@ int main(){
     return 0;
 }
 
-Vector2 Scorebox_spawn(int &Length){
+Vector2 Scorebox_spawn(int &Length, int tolerance){
     random_device rd;
     std::mt19937 gen(rd());
     Length = GetRandomValue(40,60);
     std::uniform_int_distribution  X(0+Length, screenWidth-Length);
-    std::uniform_int_distribution  Y(0+Length, screenHeight-Length);
+    std::uniform_int_distribution  Y(0+Length+tolerance, screenHeight-Length-tolerance);
 
     int x = X(gen);
     int y = Y(gen);
     Vector2 v = {(float) x, (float) y};
-
     std::cout<<"("<<v.x<<","<<v.y<<")"<<std::endl;
     return v;
 }
