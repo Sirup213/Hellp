@@ -17,6 +17,23 @@ void Etriangle(Vector2 vector, float radius, Color colour);
 
 Vector2 Scorebox_spawn(int &Length, int tolerance);
 
+void Dialogue(const string& text, float fontsize, Vector2 position, Texture2D tex){
+    float length = MeasureText(text.c_str(), fontsize);
+    float m = roundf(fontsize/5.0f);
+    Vector2 p = {roundf(position.x), roundf(position.y)};
+
+    DrawTexturePro(tex, {0,0,3,3}, {p.x, p.y, m*3, m*3}, {0,0}, 0, WHITE);//(1,1)
+    DrawTexturePro(tex, {3,0,24,3}, {p.x + m*3, p.y, length, m*3}, {0,0}, 0, WHITE);//(2,1)
+    DrawTexturePro(tex, {27,0,3,3}, {p.x + length + m*3, p.y, m*3, m*3}, {0,0}, 0, WHITE);//(3,1)
+    DrawTexturePro(tex, {0,3,3,3}, {p.x, p.y + m*3, m*3, fontsize}, {0,0}, 0, WHITE);//(1,2)
+    DrawTexturePro(tex, {3,3,24,3}, {p.x + m*3, p.y+m*3, length, fontsize}, {0,0}, 0, WHITE);//(2,2)
+    DrawTexturePro(tex, {27,3,3,3}, {p.x + length + m*3, p.y+m*3, m*3, fontsize}, {0,0}, 0, WHITE);//(3,2)
+    DrawTexturePro(tex, {0,6,3,3}, {p.x, p.y + m*3 + fontsize, m*3, m*3}, {0,0}, 0, WHITE);//(1,3)
+    DrawTexturePro(tex, {3,6,24,3}, {p.x + m*3, p.y + m*3 + fontsize, length, m*3}, {0,0}, 0, WHITE);//(2,3)
+    DrawTexturePro(tex, {27,6,3,3}, {p.x + length + m*3, p.y+m*3 + fontsize, m*3, m*3}, {0,0}, 0, WHITE);//(3,3)
+    DrawText(text.c_str(), p.x+m*3, p.y+m*3, fontsize, BLACK);
+}
+
 struct Character
 {
     string name;
@@ -41,10 +58,11 @@ int main(){
 
     Color BG = {0,0,0,150};
     //Textures
-    RenderTexture bulletTexture = LoadRenderTexture(5,5);
+    RenderTexture bulletTexture = LoadRenderTexture(7,7);
     BeginTextureMode(bulletTexture);
         DrawCircle(bulletTexture.texture.width/2,bulletTexture.texture.height/2,(float)2, YELLOW);
     EndTextureMode();
+
     Texture2D star_texture[StarTextures];
     for(int i=0; i<StarTextures; i++){
         Image Star = LoadImage(TextFormat("Assets/Stars/Star%02d.png",i));
@@ -52,9 +70,14 @@ int main(){
         UnloadImage(Star);
     }
 
-    Image Back = LoadImage("Assets/Stars/pixilart-animation.png");
+    Image Back = LoadImage("Assets/starrysky02.png");
     Texture2D Starrysky = LoadTextureFromImage(Back);
     UnloadImage(Back);
+
+    Image Box = LoadImage("Assets/Dialougebox.png");
+    Texture2D Dialougebox = LoadTextureFromImage(Box);
+    UnloadImage(Box);
+    SetTextureFilter(Dialougebox, TEXTURE_FILTER_POINT);
     
     //Character
     Character John("John", "Assets/Charactersprite00.png");
@@ -65,8 +88,11 @@ int main(){
     Vector2 StarPos={screenWidth/2, 0};
 
     //Player(Cam inside)
-    Player player(60, 1, 10);
+    Player player(60, 1, 8);
     float spawn_immunity = 2;
+    float cam_timer = 0;
+    float shake_time = 0.5;
+    bool camera_shake=false;
 
     //Score
     float Score = 0;
@@ -91,10 +117,6 @@ int main(){
     int starcount=0;
     float scrollspeed = 8;
 
-    for(int i=0; i<5; i++){
-        bullet[i].spawntop(bulletcount, bulletTexture.texture, player.position, false);
-    }
-
     for(int i=0; i<20;i++){
         star[starcount].spawn();
         starcount++;
@@ -104,6 +126,7 @@ int main(){
 
         float dt = GetFrameTime();
         if(player.iframes>0){player.iframes--;} 
+        if(IsKeyPressed(KEY_O)){player.damage(1);}
 
         if(player.immune_timer>0){ player.immune_timer -= (float) dt;}
         else{player.immune_timer=0; player.immune=false;}
@@ -117,7 +140,7 @@ int main(){
             }
 
             if(!exist){
-                Score_box_position = Scorebox_spawn(Length, 20-);
+                Score_box_position = Scorebox_spawn(Length, 20);
                 exist = true;
                 std::cout<<Score<<std::endl;
             }
@@ -170,33 +193,39 @@ int main(){
                 }
             }
         }
+        if(player.damaged && player.alive && !camera_shake){cam_timer = shake_time; player.damaged=false; camera_shake=true;}
+        if(cam_timer<=shake_time*1.0f && cam_timer>shake_time*2.0f/3.0f){
+            player.cam.offset.x += (3.0f*3.0f)*dt;
+            player.cam.offset.y += (3.0f*3.0f)*dt;
+            cam_timer-=dt;
+            player.color = RED;
+        }
+        else if(cam_timer>0.0f && cam_timer<shake_time*2.0f/3.0f){
+            player.cam.offset.x -= (3.0f*3.0f/2.0f)*dt;
+            player.cam.offset.y -= (3.0f*3.0f/2.0f)*dt;
+            cam_timer-=dt;
+            player.color = BLUE;
+            if(player.cam.offset.x < 0.01){player.cam.offset.x=0;player.cam.offset.y=0; camera_shake=false;}
+        }
+        if(cam_timer<0){cam_timer=0; camera_shake=false;}
 
         BeginDrawing();
 
         ClearBackground(BG);
 
-        DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
-        if(player.health==1){John.expression = 2;}
-        DrawTexturePro(John.spritesheet, {(float)16*(John.expression), 0, 16, 16}, {screenWidth + 20, 20, 56, 56}, {0, 0}, 0, WHITE);
-        DrawRectangleRoundedLines({screenWidth+16, 15, 56+5, 56+5}, 0.5, 4, RAYWHITE);
-        DrawText("John", screenWidth+102, (15+15+56+5)/2.0f-16, 40, RAYWHITE);
+        DrawTexture(Starrysky, 0, 0, WHITE);
 
         for(int i=0; i<starcount;i++){
             star[i].draw(star_texture);
         }
 
-        DrawLineBezier({0, 0}, {screenWidth, 0}, 7, DARKGRAY);
-        DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
-        DrawLineBezier({0, screenHeight}, {screenWidth, screenHeight}, 7, DARKGRAY);
-        DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
-
-        
-        DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
         if(exist){
             DrawRectangle(Score_box_position.x - Length/2, Score_box_position.y - Length/2, Length, Length, {200, 200, 200, 90});
         }
 
-        Etriangle(player.position, player.radius, BLUE);
+        BeginMode2D(player.cam);
+            Etriangle(player.position, player.radius, player.color);
+        EndMode2D();
 
         for(int i=0; i<bulletcount; i++){
             if(!bullet[i].GetDisabled()){
@@ -205,6 +234,23 @@ int main(){
                 bullet[i].trail(6);
             }
         }
+
+        DrawLineBezier({0, 0}, {screenWidth, 0}, 7, DARKGRAY);
+        DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
+        DrawLineBezier({0, screenHeight}, {screenWidth, screenHeight}, 7, DARKGRAY);
+        DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
+
+        DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
+        if(player.health==1){John.expression = 2;}
+        DrawTexturePro(John.spritesheet, {(float)16*(John.expression), 0, 16, 16}, {screenWidth + 20, 20, 56, 56}, {0, 0}, 0, WHITE);
+        DrawRectangleRoundedLines({screenWidth+16, 15, 56+5, 56+5}, 0.5, 4, RAYWHITE);
+        DrawText("John", screenWidth+102, (15+15+56+5)/2.0f-16, 40, RAYWHITE);
+
+        //Dialogue
+        Dialogue("Hi! What's ya name?", 20, {screenWidth+16, 86}, Dialougebox);
+    
+        DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
+        DrawText(TextFormat("Position:(%.3f, %.3f)", player.cam.offset.x, player.cam.offset.y), 10, 30, 20, DARKGRAY);
         
         if(IsKeyDown(KEY_R)){player.revive(spawn_immunity); John.expression=0;}
         if(!player.alive){

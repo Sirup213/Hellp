@@ -13,6 +13,7 @@ struct Player{
     Vector2 position;
     Vector2 velocity;
     int radius;
+    Color color;
     float speed;
     float speedmult;
     bool alive;
@@ -22,10 +23,13 @@ struct Player{
     int iframes;
 
     Player(float s, float m, int r){
-        cam.target={screenWidth/2.0f, screenHeight/2.0f};
-        position={screenWidth/2.0f, screenHeight/2.0f};
+        cam.target={0, 0};
+        cam.rotation=0;
+        cam.zoom = 1.0f;
+        position={screenWidth/2.0f, screenHeight-20.0f};
         velocity={0,0};
         radius = r;
+        color = BLUE;
         speed = s; speedmult = m;
         health = 2;
         alive = true;
@@ -55,12 +59,14 @@ struct Player{
     }
 
     void damage(int d){
-        if(iframes==0){
+        if(iframes==0 && !damaged){
             health-=d;
             iframes = 5;
             if(health==0){alive=false;}
+            damaged = true;
         }
     }
+
 
 };
 
