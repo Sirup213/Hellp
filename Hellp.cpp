@@ -53,7 +53,7 @@ int main(){
     const int Textarea = 240;
     int current_fps=fps;
     //Starting the window
-    InitWindow(screenWidth + Textarea, screenHeight, "Hellp");
+    InitWindow(screenWidth, screenHeight, "Hellp");
     SetTargetFPS(current_fps);
 
     Color BG = {0,0,0,150};
@@ -73,17 +73,6 @@ int main(){
     Image Back = LoadImage("Assets/starrysky02.png");
     Texture2D Starrysky = LoadTextureFromImage(Back);
     UnloadImage(Back);
-
-    Image Box = LoadImage("Assets/Dialougebox.png");
-    Texture2D Dialougebox = LoadTextureFromImage(Box);
-    UnloadImage(Box);
-    SetTextureFilter(Dialougebox, TEXTURE_FILTER_POINT);
-    
-    //Character
-    Character John("John", "Assets/Charactersprite00.png");
-    Image characterimage = LoadImage(TextFormat(John.Imagepath.data()));
-    John.spritesheet = LoadTextureFromImage(characterimage);
-    UnloadImage(characterimage);
 
     Vector2 StarPos={screenWidth/2, 0};
 
@@ -193,16 +182,20 @@ int main(){
                 }
             }
         }
-        if(player.damaged && player.alive && !camera_shake){cam_timer = shake_time; player.damaged=false; camera_shake=true;}
+        float shake_magnitude = 5.0;
+        if(player.damaged && !camera_shake){
+            if(player.alive){cam_timer = shake_time; player.damaged=false; camera_shake=true;}
+            else{player.damaged = false;}            
+        }
         if(cam_timer<=shake_time*1.0f && cam_timer>shake_time*2.0f/3.0f){
-            player.cam.offset.x += (3.0f*3.0f)*dt;
-            player.cam.offset.y += (3.0f*3.0f)*dt;
+            player.cam.offset.x += (shake_magnitude*3.0f)*dt;
+            player.cam.offset.y += (shake_magnitude*3.0f)*dt;
             cam_timer-=dt;
             player.color = RED;
         }
         else if(cam_timer>0.0f && cam_timer<shake_time*2.0f/3.0f){
-            player.cam.offset.x -= (3.0f*3.0f/2.0f)*dt;
-            player.cam.offset.y -= (3.0f*3.0f/2.0f)*dt;
+            player.cam.offset.x -= (shake_magnitude*3.0f/2.0f)*dt;
+            player.cam.offset.y -= (shake_magnitude*3.0f/2.0f)*dt;
             cam_timer-=dt;
             player.color = BLUE;
             if(player.cam.offset.x < 0.01){player.cam.offset.x=0;player.cam.offset.y=0; camera_shake=false;}
@@ -239,22 +232,11 @@ int main(){
         DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({0, screenHeight}, {screenWidth, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
-
-        DrawRectangle(screenWidth, 0, Textarea, screenHeight, BLUE);
-        if(player.health==1){John.expression = 2;}
-        DrawTexturePro(John.spritesheet, {(float)16*(John.expression), 0, 16, 16}, {screenWidth + 20, 20, 56, 56}, {0, 0}, 0, WHITE);
-        DrawRectangleRoundedLines({screenWidth+16, 15, 56+5, 56+5}, 0.5, 4, RAYWHITE);
-        DrawText("John", screenWidth+102, (15+15+56+5)/2.0f-16, 40, RAYWHITE);
-
-        //Dialogue
-        Dialogue("Hi! What's ya name?", 20, {screenWidth+16, 86}, Dialougebox);
     
         DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
-        DrawText(TextFormat("Position:(%.3f, %.3f)", player.cam.offset.x, player.cam.offset.y), 10, 30, 20, DARKGRAY);
         
-        if(IsKeyDown(KEY_R)){player.revive(spawn_immunity); John.expression=0;}
+        if(IsKeyDown(KEY_R)){player.revive(spawn_immunity);}
         if(!player.alive){
-            John.expression = 3;
             DrawText("ded!", (int)screenWidth/2.0 , (int)screenHeight/2.0, 25, LIGHTGRAY);
         //I actually forgot to make him alive when cleaning code. So, he was just immortal & dead, which is famously a bad thing.
         //I just realized that I also forgot to make him immune. So, he was just dead. 
@@ -267,7 +249,6 @@ int main(){
         UnloadTexture(star_texture[i]);
     }
     UnloadRenderTexture(bulletTexture);
-    UnloadTexture(John.spritesheet);
 
     RL_FREE(star);
 
