@@ -117,7 +117,7 @@ int main(){
             }
 
             if(!exist){
-                Score_box_position = Scorebox_spawn(Length, 20-);
+                Score_box_position = Scorebox_spawn(Length, 20);
                 exist = true;
                 std::cout<<Score<<std::endl;
             }
