@@ -136,8 +136,11 @@ int main(){
 
         if(bulletcount>= MAX_BULLETS){
             bulletcount=0;
+            for(int i = bulletDisabled; i<MAX_BULLETS;i++){
+                bullet[i].swapdata(bullet[bulletcount]);
+                bulletcount++;
+            }
             bulletDisabled=0;
-            int j = 0;
         }
 
         timer += (float) GetFrameTime();
@@ -150,6 +153,16 @@ int main(){
                 if(active){val = GetRandomValue(0, 1); cooldown = 0.1;}
                 else{val = GetRandomValue(0, 23)/23.0f; cooldown = 0.08;}
                 bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, player.position, (bool) val, active);
+            }
+        }
+
+        for(int i=0; i<bulletcount; i++){
+            if(player.alive==true && !bullet[i].GetDisabled()){
+                int disabled = bulletDisabled;
+                bullet[i].update(bulletDisabled, GetFrameTime(), player);
+                if(disabled != bulletDisabled){
+                    bullet[i].swapdata(bullet[bulletDisabled]);
+                }
             }
         }
 
@@ -172,15 +185,6 @@ int main(){
             }
         }
 
-        for(int i=0; i<bulletcount; i++){
-            if(player.alive==true && !bullet[i].GetDisabled()){
-                int disabled = bulletDisabled;
-                bullet[i].update(bulletDisabled , GetFrameTime(), player);
-                if(disabled != bulletDisabled){
-                    bullet[i].swapdata(bullet[MAX_BULLETS - (bulletDisabled-1)]);
-                }
-            }
-        }
         float shake_magnitude = 6.0;
         if(player.damaged && !camera_shake){
             if(player.alive){cam_timer = shake_time; player.damaged=false; camera_shake=true;}
