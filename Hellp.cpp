@@ -181,11 +181,7 @@ int main(){
                 }
             }
         }
-<<<<<<< HEAD
         float shake_magnitude = 6.0;
-=======
-        float shake_magnitude = 5.0;
->>>>>>> 771137c2166f091c0a0cfe1b4476778ef6a6afc6
         if(player.damaged && !camera_shake){
             if(player.alive){cam_timer = shake_time; player.damaged=false; camera_shake=true;}
             else{player.damaged = false;}            
@@ -237,10 +233,7 @@ int main(){
         DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
     
         DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
-<<<<<<< HEAD
         DrawText(TextFormat("Position: (%.0f, %.0f)", player.position.x, player.position.y), 10, 30, 20, DARKGRAY);
-=======
->>>>>>> 771137c2166f091c0a0cfe1b4476778ef6a6afc6
         
         if(IsKeyDown(KEY_R)){player.revive(spawn_immunity);}
         if(!player.alive){
