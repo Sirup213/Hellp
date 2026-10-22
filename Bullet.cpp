@@ -9,19 +9,20 @@ static std::mt19937 gen;
 static std::uniform_real_distribution <float> rndx(0, screenWidth);
 static std::uniform_real_distribution <float> y(-10, 0);
 static std::normal_distribution <float> speed(210, 10);
-static std::normal_distribution <float> ntheta(0, (float)(1.0f/2.0f)*PI);
 static std::uniform_real_distribution <float> One(-1,1); 
 
 bool Bullet::GetDisabled(){
     return disabled;
 }
 
-void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targeted, bool active){
+void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targeted, float stddev){
     position = {rndx(gen), y(gen)};
 
     if(targeted = true){
-    velocity = Vector2Normalize(Vector2Subtract(Circle, position));
-    velocity = Vector2Rotate(velocity,Clamp(ntheta(gen), -(0.8)*PI, (0.8)*PI));
+        if(stddev<=0){stddev = 0; std::cout<<"FAILED"<<std::endl;}
+        std::normal_distribution <float> ntheta(0, (float) stddev*PI);
+        velocity = Vector2Normalize(Vector2Subtract(Circle, position));
+        velocity = Vector2Rotate(velocity,Clamp(ntheta(gen), -(0.77)*PI, (0.77)*PI));
     }
     else{
         velocity.x = Clamp(One(gen), -0.88, 0.88);
@@ -30,10 +31,6 @@ void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targ
     }
     radius = 3;
     velocity = Vector2Scale(velocity, Clamp(speed(gen), 10, 400));
-
-    if(!active){}
-    else{}
-
 
     disabled = false;
     texture = tex;

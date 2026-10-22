@@ -17,23 +17,6 @@ void Etriangle(Vector2 vector, float radius, Color colour);
 
 Vector2 Scorebox_spawn(int &Length, int tolerance);
 
-void Dialogue(const string& text, float fontsize, Vector2 position, Texture2D tex){
-    float length = MeasureText(text.c_str(), fontsize);
-    float m = roundf(fontsize/5.0f);
-    Vector2 p = {roundf(position.x), roundf(position.y)};
-
-    DrawTexturePro(tex, {0,0,3,3}, {p.x, p.y, m*3, m*3}, {0,0}, 0, WHITE);//(1,1)
-    DrawTexturePro(tex, {3,0,24,3}, {p.x + m*3, p.y, length, m*3}, {0,0}, 0, WHITE);//(2,1)
-    DrawTexturePro(tex, {27,0,3,3}, {p.x + length + m*3, p.y, m*3, m*3}, {0,0}, 0, WHITE);//(3,1)
-    DrawTexturePro(tex, {0,3,3,3}, {p.x, p.y + m*3, m*3, fontsize}, {0,0}, 0, WHITE);//(1,2)
-    DrawTexturePro(tex, {3,3,24,3}, {p.x + m*3, p.y+m*3, length, fontsize}, {0,0}, 0, WHITE);//(2,2)
-    DrawTexturePro(tex, {27,3,3,3}, {p.x + length + m*3, p.y+m*3, m*3, fontsize}, {0,0}, 0, WHITE);//(3,2)
-    DrawTexturePro(tex, {0,6,3,3}, {p.x, p.y + m*3 + fontsize, m*3, m*3}, {0,0}, 0, WHITE);//(1,3)
-    DrawTexturePro(tex, {3,6,24,3}, {p.x + m*3, p.y + m*3 + fontsize, length, m*3}, {0,0}, 0, WHITE);//(2,3)
-    DrawTexturePro(tex, {27,6,3,3}, {p.x + length + m*3, p.y+m*3 + fontsize, m*3, m*3}, {0,0}, 0, WHITE);//(3,3)
-    DrawText(text.c_str(), p.x+m*3, p.y+m*3, fontsize, BLACK);
-}
-
 struct Character
 {
     string name;
@@ -72,6 +55,13 @@ int main(){
     Image Back = LoadImage("Assets/starrysky02.png");
     Texture2D Starrysky = LoadTextureFromImage(Back);
     UnloadImage(Back);
+
+    Image ack = LoadImage("Assets/Box.png");
+    Texture2D box = LoadTextureFromImage(ack);
+    UnloadImage(ack);
+
+    Textbox test(box, 4, 21, 4, 3);
+
 
     Vector2 StarPos={screenWidth/2, 0};
 
@@ -150,9 +140,10 @@ int main(){
 
             if(bulletcount < MAX_BULLETS){
                 int val = 0;
-                if(active){val = GetRandomValue(0, 1); cooldown = 0.1;}
-                else{val = GetRandomValue(0, 23)/23.0f; cooldown = 0.08;}
-                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, player.position, (bool) val, active);
+                float stddev = 1.0f/2.0f;
+                if(active){val = GetRandomValue(0, 1); cooldown = 0.15; stddev = 1.7f/5.0f;}
+                else{val = 0; cooldown = 0.08;}
+                bullet[bulletcount].spawntop(bulletcount, bulletTexture.texture, player.position, (bool) val, stddev);
             }
         }
 
@@ -238,6 +229,8 @@ int main(){
     
         DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
         DrawText(TextFormat("Position: (%.0f, %.0f)", player.position.x, player.position.y), 10, 30, 20, DARKGRAY);
+
+        //test.Dialogue("Please work", 30, {40, 40}); Fix the textbox code. Come back with a better mind
         
         if(IsKeyDown(KEY_R)){player.revive(spawn_immunity);}
         if(!player.alive){

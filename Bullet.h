@@ -19,7 +19,7 @@ public:
     Bullet(){}
     ~Bullet(){}
     bool GetDisabled();
-    void spawntop(int &bulletcount, Texture2D texture, Vector2 Circle, bool targeted = false, bool active = false);
+    void spawntop(int &bulletcount, Texture2D texture, Vector2 Circle, bool targeted = false, float stddev = 1.0f/2.0f);
     void draw();
     void update(int &bulletdisabled, float dt, Player &player);
     void trail(int stepsize , int length = 4, int skip = 1);
