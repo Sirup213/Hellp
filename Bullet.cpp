@@ -40,7 +40,7 @@ void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targ
 }
 
 void Bullet::update(int &bulletdisabled, float dt, Player &player){
-    pastpos = position;
+    if(dt!=0){pastpos = position;}
     position = Vector2Add(position, Vector2Scale(velocity, dt));
     velocity = Vector2Subtract(velocity, Vector2Scale(velocity, 0.0001*dt));
 

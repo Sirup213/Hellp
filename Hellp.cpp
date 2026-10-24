@@ -34,6 +34,8 @@ int main(){
     const int fps=60;
     const int Textarea = 240;
     int current_fps=fps;
+    bool exittriggered= false;
+    bool close=false;
     //Starting the window
     InitWindow(screenWidth, screenHeight, "Hellp");
     SetTargetFPS(current_fps);
@@ -62,8 +64,8 @@ int main(){
 
     Textbox test(box, 4, 21, 4, 3);
 
-
     Vector2 StarPos={screenWidth/2, 0};
+    bool paused=false;
 
     //Player(Cam inside)
     Player player(60, 1, 8);
@@ -100,11 +102,17 @@ int main(){
         starcount++;
     }
 
-    while(!WindowShouldClose()){
+    float dt;
+    while(!close){
 
-        float dt = GetFrameTime();
-        if(player.iframes>0){player.iframes--;} 
-        if(IsKeyPressed(KEY_O)){player.damage(1);}
+        if(IsKeyPressed(KEY_ESCAPE)){exittriggered=true;}
+        else if(WindowShouldClose()){close= true;}
+
+        if(exittriggered){paused = true; dt=0;}
+        else{dt = GetFrameTime();}
+
+        if(player.iframes>0 && !paused){player.iframes--;} 
+        if(IsKeyPressed(KEY_O) && !paused){player.damage(1);}
 
         if(player.immune_timer>0){ player.immune_timer -= (float) dt;}
         else{player.immune_timer=0; player.immune=false;}
@@ -133,7 +141,7 @@ int main(){
             bulletDisabled=0;
         }
 
-        timer += (float) GetFrameTime();
+        timer += dt;
         
         if( player.alive == true && timer>=cooldown){
             timer = 0;
@@ -150,7 +158,7 @@ int main(){
         for(int i=0; i<bulletcount; i++){
             if(player.alive==true && !bullet[i].GetDisabled()){
                 int disabled = bulletDisabled;
-                bullet[i].update(bulletDisabled, GetFrameTime(), player);
+                bullet[i].update(bulletDisabled, dt, player);
                 if(disabled != bulletDisabled){
                     bullet[i].swapdata(bullet[bulletDisabled]);
                 }
@@ -226,6 +234,9 @@ int main(){
         DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({0, screenHeight}, {screenWidth, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
+
+        DrawLineBezier({screenWidth/2, 0}, {screenWidth/2, screenHeight}, 5, RED);
+        DrawLineBezier({0, screenHeight/2}, {screenWidth, screenHeight/2}, 5, RED);
     
         DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
         DrawText(TextFormat("Position: (%.0f, %.0f)", player.position.x, player.position.y), 10, 30, 20, DARKGRAY);
@@ -237,6 +248,12 @@ int main(){
             DrawText("ded!", (int)screenWidth/2.0 , (int)screenHeight/2.0, 25, LIGHTGRAY);
         //I actually forgot to make him alive when cleaning code. So, he was just immortal & dead, which is famously a bad thing.
         //I just realized that I also forgot to make him immune. So, he was just dead. 
+        }
+
+        if(exittriggered){
+            DrawRectangle(7/2, 7/2, screenWidth-7/2, screenHeight-7/2, {255, 255, 255, 50});
+            test.Dialoguecentred("Quit", 40, {screenWidth/2, screenHeight/2});
+            if(IsKeyPressed(KEY_C)){close = true;}
         }
 
         EndDrawing();

@@ -84,11 +84,11 @@ struct Player{
 struct Textbox{
     Texture2D texture;
     Rectangle splice[9];
-    int w1,w2,h1,h2;
+    int w,w2,h,h2;
 
     Textbox(Texture2D tex, float x1, float x2, float y1, float y2){
         texture = tex;
-        w1=x1; w2=x2; h1=y1; h2=y2;
+        w=x1; h=y1; w2=x2;
         splice[0] = {0, 0, x1, y1};//1,1
         splice[1] = {x1, 0, x2, y1};//2,1
         splice[2] = {x1+x2, 0, x1, y1};//3,1
@@ -103,20 +103,59 @@ struct Textbox{
     void Dialogue(const std::string &text, float fontsize, Vector2 position){
         float length = MeasureText(text.c_str(), fontsize);
         float m = roundf(fontsize/5.0f);
+        if(length<=m*w2){ length = m*w2; }
         Vector2 p = {roundf(position.x), roundf(position.y)};
-        int scalefactor = m;
-        Vector2 correction = {0, 0};
+
+        int col=0; int row=0;
+        float width = w; float height = h; 
+        int textX=p.x+m*w;
 
         for(int i=0; i<9; i++){
-            if(length>m*splice[1].width){
-                if(i%3==1){scalefactor = length/splice[i].width;}
-                if(i%3==2){correction = {length, 0};}
-                else{scalefactor = m; correction = {0, 0};}
-            }
-            DrawTexturePro(texture, splice[i], placeat(scalerec(splice[i], scalefactor), p), {0,0}, 0, WHITE);
+            col = i%3;
+            row = i/3;
+            width = m*w; height = m*h;
+            if(col%3==1){width = length;}
+            if(row%3==1){height = fontsize;}
+
+            DrawTexturePro(texture, splice[i], {p.x, p.y, width, height}, {0, 0}, 0, WHITE);
+            if(col<2){p.x+=width;}
+            else{p.x=roundf(position.x); p.y+= height;}
         }
 
-        DrawText(text.c_str(), p.x+m*splice[0].width, p.y+m*splice[0].height, fontsize, BLACK);
+        p = {roundf(position.x), roundf(position.y)};
+
+        DrawText(text.c_str(), textX, p.y+m*h, fontsize, WHITE);
+    }
+
+    void Dialoguecentred(const std::string &text, float fontsize, Vector2 position){
+        float length = MeasureText(text.c_str(), fontsize);
+        float m = roundf(fontsize/5.0f);
+        Vector2 p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
+        int textX=p.x+m*w;
+        if(length<=m*w2){
+            length = m*w2;
+            p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
+            textX = p.x+m*w + (m*w2 - MeasureText(text.c_str(), fontsize));
+        }
+
+        int col=0; int row=0;
+        float width = w; float height = h; 
+
+        for(int i=0; i<9; i++){
+            col = i%3;
+            row = i/3;
+            width = m*w; height = m*h;
+            if(col%3==1){width = length;}
+            if(row%3==1){height = fontsize;}
+
+            DrawTexturePro(texture, splice[i], {p.x, p.y, width, height}, {0, 0}, 0, WHITE);
+            if(col<2){p.x+=width;}
+            else{p.x=roundf(position.x - (length/2 + m*w)); p.y+= height;}
+        }
+
+        p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
+
+        DrawText(text.c_str(), p.x+m*w + (m*w2 - MeasureText(text.c_str(), fontsize))/2, p.y+m*h, fontsize, WHITE);
     }
 };
 
