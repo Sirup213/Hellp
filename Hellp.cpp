@@ -105,8 +105,13 @@ int main(){
     float dt;
     while(!close){
 
-        if(IsKeyPressed(KEY_ESCAPE)){exittriggered=true;}
-        else if(WindowShouldClose()){close= true;}
+        if(IsKeyPressed(KEY_ESCAPE)){exittriggered=true; std::cout<<"Menu"<<std::endl;}
+        else if(WindowShouldClose()){close = true;}
+        else{
+            if(GetKeyPressed() != KEY_ESCAPE && GetKeyPressed() != KEY_C && GetKeyPressed() != 0){
+                exittriggered = false; std::cout<<"Works"<<std::endl;
+            }
+        }
 
         if(exittriggered){paused = true; dt=0;}
         else{dt = GetFrameTime();}
@@ -234,14 +239,9 @@ int main(){
         DrawLineBezier({0, 0}, {0, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({0, screenHeight}, {screenWidth, screenHeight}, 7, DARKGRAY);
         DrawLineBezier({screenWidth, 0}, {screenWidth, screenHeight}, 7, DARKGRAY);
-
-        DrawLineBezier({screenWidth/2, 0}, {screenWidth/2, screenHeight}, 5, RED);
-        DrawLineBezier({0, screenHeight/2}, {screenWidth, screenHeight/2}, 5, RED);
     
         DrawText(TextFormat("Score: %.0f", Score), 10, 10, 20, DARKGRAY);
         DrawText(TextFormat("Position: (%.0f, %.0f)", player.position.x, player.position.y), 10, 30, 20, DARKGRAY);
-
-        //test.Dialogue("Please work", 30, {40, 40}); Fix the textbox code. Come back with a better mind
         
         if(IsKeyDown(KEY_R)){player.revive(spawn_immunity);}
         if(!player.alive){
@@ -252,8 +252,11 @@ int main(){
 
         if(exittriggered){
             DrawRectangle(7/2, 7/2, screenWidth-7/2, screenHeight-7/2, {255, 255, 255, 50});
-            test.Dialoguecentred("Quit", 40, {screenWidth/2, screenHeight/2});
+            test.Dialoguecentred("Quit", 40, {screenWidth/2, screenHeight/2}, "Press C Key", 10);
             if(IsKeyPressed(KEY_C)){close = true;}
+            if(GetKeyPressed() != KEY_ESCAPE && GetKeyPressed() != KEY_C && GetKeyPressed() != 0){
+                exittriggered = false; std::cout<<"Works"<<std::endl;
+            }
         }
 
         EndDrawing();
