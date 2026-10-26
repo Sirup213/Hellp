@@ -135,7 +135,7 @@ struct Textbox{
         if(length<=m*w2){
             length = m*w2;
             p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
-            textX = p.x+m*w + (m*w2 - MeasureText(text.c_str(), fontsize));
+            textX = p.x+m*w + (m*w2 - MeasureText(text.c_str(), fontsize))/2;
         }
 
         int col=0; int row=0;
@@ -155,7 +155,40 @@ struct Textbox{
 
         p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
 
-        DrawText(text.c_str(), p.x+m*w + (m*w2 - MeasureText(text.c_str(), fontsize))/2, p.y+m*h, fontsize, WHITE);
+        DrawText(text.c_str(), textX, p.y+m*h, fontsize, WHITE);
+    }
+
+    void Dialoguecentred(const std::string &text, float fontsize, Vector2 position, const std::string &hint, float fontsize2){
+        float length = MeasureText(text.c_str(), fontsize);
+        float m = roundf(fontsize/5.0f);
+        Vector2 p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
+        int textX=p.x+m*w;
+        if(length<=m*w2){
+            length = m*w2;
+            p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
+            textX = p.x+m*w + (m*w2 - MeasureText(text.c_str(), fontsize))/2;
+        }
+
+        int col=0; int row=0;
+        float width = w; float height = h; 
+
+        for(int i=0; i<9; i++){
+            col = i%3;
+            row = i/3;
+            width = m*w; height = m*h;
+            if(col%3==1){width = length;}
+            if(row%3==1){height = fontsize;}
+
+            DrawTexturePro(texture, splice[i], {p.x, p.y, width, height}, {0, 0}, 0, WHITE);
+            if(col<2){p.x+=width;}
+            else{p.x=roundf(position.x - (length/2 + m*w)); p.y+= height;}
+        }
+
+        p = {roundf(position.x - (length/2 + m*w)), roundf(position.y - (fontsize/2 + m*h))};
+
+        DrawText(text.c_str(), textX, p.y+m*h, fontsize, WHITE);
+
+        DrawText(hint.c_str(), p.x+m*w + (m*w2 - MeasureText(hint.c_str(), fontsize2))/2, p.y+m*h+fontsize, fontsize2, WHITE);
     }
 };
 
