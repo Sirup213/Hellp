@@ -88,7 +88,7 @@ int main(){
     Bullet bullet[MAX_BULLETS];
     int bulletcount = 0;
     int bulletDisabled = 0;
-    float cooldown = 0.08;
+    float cooldown = 0.0005;
     float timer=cooldown;
     Color bullet_color = YELLOW;
 
@@ -108,12 +108,17 @@ int main(){
         if(IsKeyPressed(KEY_ESCAPE)){exittriggered=true; std::cout<<"Menu"<<std::endl;}
         else if(WindowShouldClose()){close = true;}
         else{
-            if(GetKeyPressed() != KEY_ESCAPE && GetKeyPressed() != KEY_C && GetKeyPressed() != 0){
+            
+        }
+
+        if(exittriggered){
+            paused = true; 
+            dt=0;
+            int key = GetKeyPressed();
+            if((key != KEY_ESCAPE && key != KEY_C && key != 0)){
                 exittriggered = false; std::cout<<"Works"<<std::endl;
             }
         }
-
-        if(exittriggered){paused = true; dt=0;}
         else{dt = GetFrameTime();}
 
         if(player.iframes>0 && !paused){player.iframes--;} 
@@ -189,7 +194,7 @@ int main(){
             }
         }
 
-        float shake_magnitude = 6.0;
+        float shake_magnitude = 10.0;
         if(player.damaged && !camera_shake){
             if(player.alive){cam_timer = shake_time; player.damaged=false; camera_shake=true;}
             else{player.damaged = false;}            

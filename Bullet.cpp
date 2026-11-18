@@ -30,7 +30,7 @@ void Bullet::spawntop(int &bulletcount, Texture2D tex, Vector2 Circle, bool targ
         velocity = Vector2Normalize(velocity);
     }
     radius = 3;
-    velocity = Vector2Scale(velocity, Clamp(speed(gen), 10, 400));
+    velocity = Vector2Scale(velocity, Clamp(speed(gen), 10, 250));
 
     disabled = false;
     texture = tex;
